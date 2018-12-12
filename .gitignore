@@ -98,3 +98,9 @@ com_crashlytics_export_strings.xml
 ehthumbs.db
 Thumbs.db
 
+
+rover\.jks
+
+app/release/key\.txt
+
+app/release/
