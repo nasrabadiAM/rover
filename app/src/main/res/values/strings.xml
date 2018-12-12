@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">rover</string>
+    <string name="reload">Reload</string>
+    <string name="ok">Ok</string>
+    <string name="out_of_land">Rover Is Out Of Land.</string>
+    <string name="rover_crash">Rover Crashed:</string>
 </resources>
