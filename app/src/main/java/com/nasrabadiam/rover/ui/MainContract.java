@@ -29,7 +29,9 @@ import java.util.List;
 public class MainContract {
     interface Presenter {
         void setView(View view);
-        void onStop();
+
+        void detachView();
+
         void getNewRover();
     }
 
@@ -56,7 +58,7 @@ public class MainContract {
 
         void showRoverCrashWithWeirs(Position lastRoverPosition);
 
-        void showPath(List<Pair<Path,Position>> paths);
+        void showPath(List<Pair<Path, Position>> paths);
 
         void showRoverOutOfLandError(Position nextRoverPosition);
     }

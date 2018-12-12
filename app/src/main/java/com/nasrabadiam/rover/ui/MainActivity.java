@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @Override
     protected void onStop() {
         super.onStop();
-        presenter.onStop();
+        presenter.detachView();
+        presenter = null;
     }
 
     @Override

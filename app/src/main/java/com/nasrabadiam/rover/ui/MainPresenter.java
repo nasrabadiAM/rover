@@ -43,7 +43,7 @@ public class MainPresenter implements MainContract.Presenter {
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private Rover lastRover;
     private Position lastRoverPosition;
-    private DIRECTION lastCurrentPosDirection=DIRECTION.TOP;
+    private DIRECTION lastCurrentPosDirection = DIRECTION.TOP;
     private List<Pair<Path, Position>> paths = new ArrayList<>();
 
     public static MainPresenter getPresenter() {
@@ -61,26 +61,28 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void onStop() {
-        executorService.shutdown();
+    public void detachView() {
+        view = null;
+        executorService.shutdownNow();
     }
 
     @Override
     public void getNewRover() {
         resetWorld();
-        view.hideLoadingError();
-        view.hideRover();
-        view.showLoading();
-        view.hideLand();
+        hideLoadingError();
+        hideRover();
+        showLoading();
+        hideLand();
         model.getNewRover(new Callback<RoverResponseModel>() {
 
             @Override
             public void onSuccess(final RoverResponseModel response) {
                 lastRoverPosition = response.startPoint;
 
-                view.hideLoading();
-                view.showLand();
-                view.resetLand();
+                hideLoading();
+                showLand();
+                resetLand();
+
                 //set Rover Start Point
                 setRoverStartPoint(response.startPoint);
 
@@ -93,14 +95,55 @@ public class MainPresenter implements MainContract.Presenter {
 
             @Override
             public void onError(Throwable throwable) {
-                view.hideLand();
-                view.hideLoading();
-                view.showLoadingError(throwable.getMessage());
+                hideLand();
+                hideLoading();
+                showLoadingError(throwable);
             }
         });
     }
 
+    private void resetLand() {
+        if (view != null)
+            view.resetLand();
+    }
+
+    private void showLand() {
+        if (view != null)
+            view.showLand();
+    }
+
+    private void showLoadingError(Throwable throwable) {
+        if (view != null)
+            view.showLoadingError(throwable.getMessage());
+    }
+
+    private void hideLoading() {
+        if (view != null)
+            view.hideLoading();
+    }
+
+    private void hideLand() {
+        if (view != null)
+            view.hideLand();
+    }
+
+    private void showLoading() {
+        if (view != null)
+            view.showLoading();
+    }
+
+    private void hideRover() {
+        if (view != null)
+            view.hideRover();
+    }
+
+    private void hideLoadingError() {
+        if (view != null)
+            view.hideLoadingError();
+    }
+
     private void resetWorld() {
+        lastCurrentPosDirection = DIRECTION.TOP;
         lastRover = new Rover(DIRECTION.TOP);
         lastRoverPosition = null;
         paths.clear();
@@ -108,11 +151,17 @@ public class MainPresenter implements MainContract.Presenter {
 
     private void setRoverStartPoint(Position position) {
         Rover initRover = new Rover(DIRECTION.TOP);
-        view.showRover(initRover, position);
+        showRover(position, initRover);
+    }
+
+    private void showRover(Position position, Rover initRover) {
+        if (view != null)
+            view.showRover(initRover, position);
     }
 
     private void setWeirs(List<Position> weirs) {
-        view.showWeirs(weirs);
+        if (view != null)
+            view.showWeirs(weirs);
     }
 
     private void runCommand(final RoverResponseModel roverResponseModel) {
@@ -133,7 +182,7 @@ public class MainPresenter implements MainContract.Presenter {
 
                     for (int index = 0; index < roverResponseModel.weirs.size(); index++) {
                         if (roverResponseModel.weirs.get(index).equals(lastRoverPosition)) {
-                            view.showRoverCrashWithWeirs(lastRoverPosition);
+                            showRoverCrashWithWeirs();
                             return;
                         }
                     }
@@ -165,33 +214,46 @@ public class MainPresenter implements MainContract.Presenter {
                             }
 
                             paths.add(new Pair<>(new Path(lastCurrentPosDirection, lastRover.getDirection()), lastRoverPosition));
-                            view.showPath(paths);
+                            showPath();
                             lastCurrentPosDirection = lastRover.getDirection();
 
 
                             if (nextRoverPosition.getX() < 0 || nextRoverPosition.getX() >= 10 ||
                                     nextRoverPosition.getY() < 0 || nextRoverPosition.getY() >= 20) {
-                                view.showRoverOutOfLandError(nextRoverPosition);
+                                showRoverOutOfLandError(nextRoverPosition);
                                 return;
                             }
-                            view.showRover(lastRover, nextRoverPosition);
+                            showRover(nextRoverPosition, lastRover);
                             lastRoverPosition = nextRoverPosition;
 
                             break;
                         case 'R':
                             lastRover.turnRight();
-                            view.showRover(lastRover, lastRoverPosition);
-
+                            showRover(lastRoverPosition, lastRover);
                             break;
                         case 'L':
                             lastRover.turnLeft();
-                            view.showRover(lastRover, lastRoverPosition);
-
+                            showRover(lastRoverPosition, lastRover);
                             break;
                     }
                 }
             }
         });
+    }
+
+    private void showRoverOutOfLandError(Position nextRoverPosition) {
+        if (view != null)
+            view.showRoverOutOfLandError(nextRoverPosition);
+    }
+
+    private void showPath() {
+        if (view != null)
+            view.showPath(paths);
+    }
+
+    private void showRoverCrashWithWeirs() {
+        if (view != null)
+            view.showRoverCrashWithWeirs(lastRoverPosition);
     }
 
 }
